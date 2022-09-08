@@ -33,7 +33,7 @@ def get_admin_info(db_url: models.URL) -> schemas.URLInfo:
     db_url.url = str(base_url.replace(path=db_url.key))
     db_url.admin_url = str(base_url.replace(path=admin_endpoint))
     return db_url
-    
+
 
 @app.get("/")
 def read_root():
@@ -43,12 +43,8 @@ def read_root():
 def create_url(url: schemas.URLBase, db: Session = Depends(get_db)):
     if not validators.url(url.target_url):
         raise_bad_request(message="Your provided URL is not valid")
-
     db_url = crud.create_db_url(db=db, url=url)
-    db_url.url = db_url.key
-    db_url.admin_url = db_url.secret_key
-
-    return db_url
+    return get_admin_info(db_url)
 
 @app.get(
     "/admin/{secret_key}",
